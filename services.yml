@@ -25,7 +25,9 @@ spec:
             - name : "RMQ_QUEUE_FROM"
               value: "data-platform-api-data-concatenation-queue"
             - name : "RMQ_QUEUE_TO"
-              value: "data-platform-api-data-concatenation-queue"
+              value: "data-platform-api-orders-creates-queue,convert-to-dpfm-orders-from-orders-edi-for-smes-queue"
+            - name : "NESTJS_DATA_CONNECTION_REQUEST_CONTROL_MANAGER_CONSUME"
+              value: "nestjs-data-connection-request-control-manager-consume"
             - name: "MYSQL_DB_NAME"
               value: "DataPlatformCommonSettingsMysqlKube"
           envFrom:
@@ -49,4 +51,4 @@ spec:
       port: 8080
       protocol: TCP
       targetPort: 8080
-      nodePort: 30909
+      nodePort: 30680

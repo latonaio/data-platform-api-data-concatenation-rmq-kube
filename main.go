@@ -1,13 +1,13 @@
 package main
 
 import (
-	"context"
 	dpfm_api_input_reader "data-platform-api-data-concatenation-rmq-kube/DPFM_API_Input_Reader"
-	api_processing_data_formatter "data-platform-api-data-concatenation-rmq-kube/DPFM_API_Processing_Data_Formatter"
-	"data-platform-api-data-concatenation-rmq-kube/concatenate_functions"
+	"data-platform-api-data-concatenation-rmq-kube/concatenate_functions/orders_concatenate_function"
+	"data-platform-api-data-concatenation-rmq-kube/concatenate_functions/orders_edi_for_smes_concatenate_function"
 	"data-platform-api-data-concatenation-rmq-kube/config"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/latonaio/golang-logging-library-for-data-platform/logger"
 	database "github.com/latonaio/golang-mysql-network-connector"
@@ -16,7 +16,6 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
 	l := logger.NewLogger()
 	conf := config.NewConf()
 	db, err := database.NewMySQL(conf.DB)
@@ -25,8 +24,6 @@ func main() {
 	}
 	defer db.Close()
 
-	_ = ctx
-	_ = db
 	rmq, err := rabbitmq.NewRabbitmqClient(conf.RMQ.URL(), conf.RMQ.QueueFrom(), "", nil, 0)
 	if err != nil {
 		l.Fatal(err.Error())
@@ -41,16 +38,18 @@ func main() {
 	l.Info("READY!")
 	for msg := range iter {
 		go func(msg rabbitmq.RabbitmqMessage) {
-			err = callProcess(msg, conf, db)
+			start := time.Now()
+			err = callProcess(conf, rmq, msg, db)
 			if err != nil {
 				l.Error(err)
 			}
 			msg.Success()
+			l.Info("process time %v\n", time.Since(start).Milliseconds())
 		}(msg)
 	}
 }
 
-func callProcess(msg rabbitmq.RabbitmqMessage, conf *config.Conf, db *database.Mysql) (err error) {
+func callProcess(conf *config.Conf, rmq *rabbitmq.RabbitmqClient, msg rabbitmq.RabbitmqMessage, db *database.Mysql) (err error) {
 	l := logger.NewLogger()
 	l.AddHeaderInfo(map[string]interface{}{"runtime_session_id": getSessionID(msg.Data())})
 	defer recovery(l, &err)
@@ -58,6 +57,11 @@ func callProcess(msg rabbitmq.RabbitmqMessage, conf *config.Conf, db *database.M
 	err = json.Unmarshal(msg.Raw(), &input)
 	if err != nil {
 		return err
+	}
+
+	if !input["result"].(bool) {
+		rmq.Send(conf.RMQ.QueueToErrResponse(), input)
+		return xerrors.New("result is false")
 	}
 
 	serviceLabel, ok := input["service_label"].(string)
@@ -69,18 +73,26 @@ func callProcess(msg rabbitmq.RabbitmqMessage, conf *config.Conf, db *database.M
 		return err
 	}
 
-	ordersSDC := api_processing_data_formatter.OrdersSDC{}
+	var output interface{}
 	switch serviceLabel {
-	case "ORDERS":
-		ordersSDC, err = concatenate_functions.OrdersConcatenate(msg, concatenateMapper)
-		if err != nil {
-			return err
-		}
+	case "FUNCTION_ORDERS_DATA_CONCATENATION":
+		c := orders_concatenate_function.NewOrdersContraller(conf, rmq, msg, l)
+		output, err = c.OrdersProcess(concatenateMapper)
+	case "FUNCTION_ORDERS_EDI_FOR_SMES_DATA_CONCATENATION":
+		c := orders_edi_for_smes_concatenate_function.NewOrdersEDIForSMEsContraller(conf, rmq, msg, l)
+		output, err = c.OrdersEDIForSMEsProcess(concatenateMapper)
 	default:
 		l.Info("Unknown service_label %v", input["service_label"])
 	}
+	if err != nil {
+		input["result"] = false
+		input["api_processing_result"] = false
+		input["api_processing_error"] = err.Error()
+		rmq.Send(conf.RMQ.QueueToErrResponse(), input)
+		return err
+	}
 
-	l.Info(ordersSDC)
+	l.JsonParseOut(output)
 
 	return err
 }

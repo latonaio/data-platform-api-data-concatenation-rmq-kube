@@ -1,4 +1,4 @@
-package dpfm_dpfm_api_processing_data_formatter
+package dpfm_api_output_formatter
 
 import (
 	"encoding/json"

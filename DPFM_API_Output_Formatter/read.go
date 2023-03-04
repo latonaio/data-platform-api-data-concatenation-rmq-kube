@@ -1,4 +1,4 @@
-package dpfm_api_input_reader
+package dpfm_api_output_formatter
 
 import (
 	"encoding/json"
@@ -17,8 +17,8 @@ func ConvertToOrdersSDC(data []byte) OrdersSDC {
 	return sdc
 }
 
-func ConvertToSDC[T any](data []byte) T {
-	var sdc T
+func ConvertToOrdersEDIForSMEsSDC(data []byte) OrdersEDIForSMEsSDC {
+	sdc := OrdersEDIForSMEsSDC{}
 	err := json.Unmarshal(data, &sdc)
 	if err != nil {
 		fmt.Printf("input data marshal error :%#v", err.Error())
