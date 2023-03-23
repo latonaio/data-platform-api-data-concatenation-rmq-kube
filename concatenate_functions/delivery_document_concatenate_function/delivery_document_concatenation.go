@@ -6,16 +6,14 @@ import (
 	"sync"
 )
 
-func (c *OrdersContraller) OrdersConcatenation(concatenateMapper []dpfm_api_input_reader.ConcatenateMapper) (dpfm_api_processing_data_formatter.OrdersSDC, error) {
+func (c *DeliveryDocumentContraller) DeliveryDocumentConcatenation(concatenateMapper []dpfm_api_input_reader.ConcatenateMapper) (dpfm_api_processing_data_formatter.DeliveryDocumentSDC, error) {
 	var err error
 	var e error
 
-	sdc := dpfm_api_input_reader.ConvertToOrdersSDC(c.msg.Raw())
-	headerAndItem := dpfm_api_processing_data_formatter.OrdersHeaderAndItem{}
-	headerAndItemAndPricingElement := make([]dpfm_api_processing_data_formatter.OrdersHeaderAndItemAndPricingElement, 0)
-	headerAndItemAndScheduleLine := make([]dpfm_api_processing_data_formatter.OrdersHeaderAndItemAndScheduleLine, 0)
-	headerAndPartner := dpfm_api_processing_data_formatter.OrdersHeaderAndPartner{}
-	headerAndAddress := dpfm_api_processing_data_formatter.OrdersHeaderAndAddress{}
+	sdc := dpfm_api_input_reader.ConvertToDeliveryDocumentSDC(c.msg.Raw())
+	headerAndItem := dpfm_api_processing_data_formatter.DeliveryDocumentHeaderAndItem{}
+	headerAndPartner := dpfm_api_processing_data_formatter.DeliveryDocumentHeaderAndPartner{}
+	headerAndAddress := dpfm_api_processing_data_formatter.DeliveryDocumentHeaderAndAddress{}
 
 	wg := sync.WaitGroup{}
 	for _, v := range concatenateMapper {
@@ -28,24 +26,6 @@ func (c *OrdersContraller) OrdersConcatenation(concatenateMapper []dpfm_api_inpu
 			go func(wg *sync.WaitGroup) {
 				defer wg.Done()
 				headerAndItem, e = newHeaderAndItem(sdc)
-				if e != nil {
-					err = e
-					return
-				}
-			}(&wg)
-		} else if baseAPIName == "A_Header" && concatenateAPIName1 == "A_Item" && concatenateAPIName2 == "A_ItemPricingElement" {
-			go func(wg *sync.WaitGroup) {
-				defer wg.Done()
-				headerAndItemAndPricingElement, e = newHeaderAndItemAndPricingElement(sdc)
-				if e != nil {
-					err = e
-					return
-				}
-			}(&wg)
-		} else if baseAPIName == "A_Header" && concatenateAPIName1 == "A_Item" && concatenateAPIName2 == "A_ItemScheduleLine" {
-			go func(wg *sync.WaitGroup) {
-				defer wg.Done()
-				headerAndItemAndScheduleLine, e = newHeaderAndItemAndScheduleLine(sdc)
 				if e != nil {
 					err = e
 					return
@@ -76,16 +56,14 @@ func (c *OrdersContraller) OrdersConcatenation(concatenateMapper []dpfm_api_inpu
 
 	wg.Wait()
 	if err != nil {
-		return dpfm_api_processing_data_formatter.OrdersSDC{}, err
+		return dpfm_api_processing_data_formatter.DeliveryDocumentSDC{}, err
 	}
 
-	ordersConcatenated := dpfm_api_processing_data_formatter.OrdersSDC{
-		HeaderAndItem:                  headerAndItem,
-		HeaderAndItemAndPricingElement: headerAndItemAndPricingElement,
-		HeaderAndItemAndScheduleLine:   headerAndItemAndScheduleLine,
-		HeaderAndPartner:               headerAndPartner,
-		HeaderAndAddress:               headerAndAddress,
+	deliveryDocumentConcatenated := dpfm_api_processing_data_formatter.DeliveryDocumentSDC{
+		HeaderAndItem:    headerAndItem,
+		HeaderAndPartner: headerAndPartner,
+		HeaderAndAddress: headerAndAddress,
 	}
 
-	return ordersConcatenated, nil
+	return deliveryDocumentConcatenated, nil
 }

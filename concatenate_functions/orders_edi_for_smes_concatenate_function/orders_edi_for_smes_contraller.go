@@ -31,7 +31,7 @@ func NewOrdersEDIForSMEsContraller(
 	}
 }
 
-func (c *OrdersEDIForSMEsContraller) OrdersEDIForSMEsProcess(concatenateMapper []dpfm_api_input_reader.ConcatenateMapper) (dpfm_api_output_formatter.OrdersEDIForSMEsSDC, error) {
+func (c *OrdersEDIForSMEsContraller) OrdersEDIForSMEsProcess(concatenateMapper []dpfm_api_input_reader.ConcatenateMapper, queueName string) (dpfm_api_output_formatter.OrdersEDIForSMEsSDC, error) {
 	ordersEDIForSMEsConcatenated, err := c.OrdersEDIForSMEsConcatenation(concatenateMapper)
 	if err != nil {
 		return dpfm_api_output_formatter.OrdersEDIForSMEsSDC{}, xerrors.Errorf("Concatenate Error: %w", err)
@@ -42,7 +42,7 @@ func (c *OrdersEDIForSMEsContraller) OrdersEDIForSMEsProcess(concatenateMapper [
 		return dpfm_api_output_formatter.OrdersEDIForSMEsSDC{}, xerrors.Errorf("Structuralize Error: %w", err)
 	}
 
-	c.rmq.Send(c.conf.RMQ.QueueTo()[1], ordersEDIForSMEsOutput)
+	c.rmq.Send(queueName, ordersEDIForSMEsOutput)
 
 	return ordersEDIForSMEsOutput, nil
 }

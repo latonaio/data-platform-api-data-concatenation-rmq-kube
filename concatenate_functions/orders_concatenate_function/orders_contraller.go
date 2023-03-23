@@ -31,7 +31,7 @@ func NewOrdersContraller(
 	}
 }
 
-func (c *OrdersContraller) OrdersProcess(concatenateMapper []dpfm_api_input_reader.ConcatenateMapper) (dpfm_api_output_formatter.OrdersSDC, error) {
+func (c *OrdersContraller) OrdersProcess(concatenateMapper []dpfm_api_input_reader.ConcatenateMapper, queueName string) (dpfm_api_output_formatter.OrdersSDC, error) {
 	ordersConcatenated, err := c.OrdersConcatenation(concatenateMapper)
 	if err != nil {
 		return dpfm_api_output_formatter.OrdersSDC{}, xerrors.Errorf("Concatenate Error: %w", err)
@@ -42,7 +42,7 @@ func (c *OrdersContraller) OrdersProcess(concatenateMapper []dpfm_api_input_read
 		return dpfm_api_output_formatter.OrdersSDC{}, xerrors.Errorf("Structuralize Error: %w", err)
 	}
 
-	c.rmq.Send(c.conf.RMQ.QueueTo()[0], ordersOutput)
+	c.rmq.Send(queueName, ordersOutput)
 
 	return ordersOutput, nil
 }

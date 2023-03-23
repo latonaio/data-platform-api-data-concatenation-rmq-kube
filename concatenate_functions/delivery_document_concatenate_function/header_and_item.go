@@ -7,19 +7,19 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func newHeaderAndItem(sdc dpfm_api_input_reader.OrdersSDC) (dpfm_api_processing_data_formatter.OrdersHeaderAndItem, error) {
-	processingHeader, err := dpfm_api_processing_data_formatter.TypeConverter[dpfm_api_processing_data_formatter.OrdersHeader](sdc.DataConcatenation.Header)
+func newHeaderAndItem(sdc dpfm_api_input_reader.DeliveryDocumentSDC) (dpfm_api_processing_data_formatter.DeliveryDocumentHeaderAndItem, error) {
+	processingHeader, err := dpfm_api_processing_data_formatter.TypeConverter[dpfm_api_processing_data_formatter.DeliveryDocumentHeader](sdc.DataConcatenation.Header)
 	if err != nil {
-		return dpfm_api_processing_data_formatter.OrdersHeaderAndItem{}, xerrors.Errorf("TypeConverter Error: %w", err)
+		return dpfm_api_processing_data_formatter.DeliveryDocumentHeaderAndItem{}, xerrors.Errorf("TypeConverter Error: %w", err)
 	}
 
-	orderID := processingHeader.OrderID
-	processingItems, err := extractItem(orderID, sdc.DataConcatenation.Item)
+	deliveryDocument := processingHeader.DeliveryDocument
+	processingItems, err := extractItem(deliveryDocument, sdc.DataConcatenation.Item)
 	if err != nil {
-		return dpfm_api_processing_data_formatter.OrdersHeaderAndItem{}, xerrors.Errorf("extractItem Error: %w", err)
+		return dpfm_api_processing_data_formatter.DeliveryDocumentHeaderAndItem{}, xerrors.Errorf("extractItem Error: %w", err)
 	}
 
-	headerAndItem := dpfm_api_processing_data_formatter.OrdersHeaderAndItem{
+	headerAndItem := dpfm_api_processing_data_formatter.DeliveryDocumentHeaderAndItem{
 		Header: processingHeader,
 		Item:   processingItems,
 	}
@@ -27,16 +27,16 @@ func newHeaderAndItem(sdc dpfm_api_input_reader.OrdersSDC) (dpfm_api_processing_
 	return headerAndItem, err
 }
 
-func extractItem(orderID int, items []dpfm_api_input_reader.OrdersItem) ([]dpfm_api_processing_data_formatter.OrdersItem, error) {
-	processingItems := make([]dpfm_api_processing_data_formatter.OrdersItem, 0)
+func extractItem(deliveryDocument int, items []dpfm_api_input_reader.DeliveryDocumentItem) ([]dpfm_api_processing_data_formatter.DeliveryDocumentItem, error) {
+	processingItems := make([]dpfm_api_processing_data_formatter.DeliveryDocumentItem, 0)
 
 	for _, item := range items {
-		if item.OrderID != orderID {
+		if item.DeliveryDocument != deliveryDocument {
 			continue
 		}
-		processingItem, err := dpfm_api_processing_data_formatter.TypeConverter[dpfm_api_processing_data_formatter.OrdersItem](item)
+		processingItem, err := dpfm_api_processing_data_formatter.TypeConverter[dpfm_api_processing_data_formatter.DeliveryDocumentItem](item)
 		if err != nil {
-			return []dpfm_api_processing_data_formatter.OrdersItem{}, xerrors.Errorf("TypeConverter Error: %w", err)
+			return []dpfm_api_processing_data_formatter.DeliveryDocumentItem{}, xerrors.Errorf("TypeConverter Error: %w", err)
 		}
 		processingItems = append(processingItems, processingItem)
 	}

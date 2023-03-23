@@ -3,6 +3,7 @@ package orders_edi_for_smes_concatenate_function
 import (
 	dpfm_api_output_formatter "data-platform-api-data-concatenation-rmq-kube/DPFM_API_Output_Formatter"
 	dpfm_api_processing_data_formatter "data-platform-api-data-concatenation-rmq-kube/DPFM_API_Processing_Data_Formatter"
+	"strings"
 )
 
 func (c *OrdersEDIForSMEsContraller) OrdersEDIForSMEsStructuralization(ordersEDIForSMEsSDC dpfm_api_processing_data_formatter.OrdersEDIForSMEsSDC) (dpfm_api_output_formatter.OrdersEDIForSMEsSDC, error) {
@@ -24,8 +25,19 @@ func (c *OrdersEDIForSMEsContraller) OrdersEDIForSMEsStructuralization(ordersEDI
 
 	output.Header = ordersEDIForSMEsHeader
 	output.ServiceLabel = "FUNCTION_CONVERT_TO_DPFM_ORDERS_FROM_ORDERS_EDI_FOR_SMES"
-	output.APIType = "function"
-	output.APISchema = "OrdersEDIForSMEsCreates"
+
+	switch strings.ToLower(output.APIType) {
+	case "creates":
+		output.APISchema = "OrdersEDIForSMEsCreates"
+	case "updates":
+		output.APISchema = "OrdersEDIForSMEsUpdates"
+	case "function":
+		output.APISchema = "OrdersEDIForSMEsCreates"
+	default:
+		c.log.Error("unknown apitype %s", output.APIType)
+		output.APIType = "creates"
+		output.APISchema = "OrdersEDIForSMEsCreates"
+	}
 
 	return output, nil
 }

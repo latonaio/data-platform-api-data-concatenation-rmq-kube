@@ -3,132 +3,104 @@ package delivery_document_concatenate_function
 import (
 	dpfm_api_output_formatter "data-platform-api-data-concatenation-rmq-kube/DPFM_API_Output_Formatter"
 	dpfm_api_processing_data_formatter "data-platform-api-data-concatenation-rmq-kube/DPFM_API_Processing_Data_Formatter"
+	"strings"
 )
 
-func (c *OrdersContraller) OrdersStructuralization(ordersSDC dpfm_api_processing_data_formatter.OrdersSDC) (dpfm_api_output_formatter.OrdersSDC, error) {
-	output := dpfm_api_output_formatter.ConvertToOrdersSDC(c.msg.Raw())
+func (c *DeliveryDocumentContraller) DeliveryDocumentStructuralization(deliveryDocumentSDC dpfm_api_processing_data_formatter.DeliveryDocumentSDC) (dpfm_api_output_formatter.DeliveryDocumentSDC, error) {
+	output := dpfm_api_output_formatter.ConvertToDeliveryDocumentSDC(c.msg.Raw())
 
 	// Header
-	ordersHeader, err := structuralizeHeader(ordersSDC)
+	deliveryDocumentHeader, err := structuralizeHeader(deliveryDocumentSDC)
 	if err != nil {
-		return dpfm_api_output_formatter.OrdersSDC{}, err
+		return dpfm_api_output_formatter.DeliveryDocumentSDC{}, err
 	}
 
 	// Item
-	ordersItems, err := structuralizeItem(ordersSDC)
+	deliveryDocumentItems, err := structuralizeItem(deliveryDocumentSDC)
 	if err != nil {
-		return dpfm_api_output_formatter.OrdersSDC{}, err
+		return dpfm_api_output_formatter.DeliveryDocumentSDC{}, err
 	}
 
 	// Partner
-	ordersPartners, err := structuralizePartner(ordersSDC)
+	deliveryDocumentPartners, err := structuralizePartner(deliveryDocumentSDC)
 	if err != nil {
-		return dpfm_api_output_formatter.OrdersSDC{}, err
+		return dpfm_api_output_formatter.DeliveryDocumentSDC{}, err
 	}
 
 	// Address
-	ordersAddresses, err := structuralizeAddress(ordersSDC)
+	deliveryDocumentAddresses, err := structuralizeAddress(deliveryDocumentSDC)
 	if err != nil {
-		return dpfm_api_output_formatter.OrdersSDC{}, err
+		return dpfm_api_output_formatter.DeliveryDocumentSDC{}, err
 	}
 
-	ordersHeader.Item = ordersItems
-	ordersHeader.Partner = ordersPartners
-	ordersHeader.Address = ordersAddresses
+	deliveryDocumentHeader.Item = deliveryDocumentItems
+	deliveryDocumentHeader.Partner = deliveryDocumentPartners
+	deliveryDocumentHeader.Address = deliveryDocumentAddresses
 
-	output.Header = ordersHeader
-	output.ServiceLabel = "ORDERS"
-	output.APIType = "creates"
-	output.APISchema = "DPFMOrdersCreates"
+	output.Header = deliveryDocumentHeader
+	output.ServiceLabel = "DELIVERY_DOCUMENT"
+
+	switch strings.ToLower(output.APIType) {
+	case "creates":
+		output.APISchema = "DPFMDeliveryDocumentCreates"
+	case "updates":
+		output.APISchema = "DPFMDeliveryDocumentUpdates"
+	case "function":
+		output.APISchema = "DPFMDeliveryDocumentCreates"
+	default:
+		c.log.Error("unknown apitype %s", output.APIType)
+		output.APIType = "creates"
+		output.APISchema = "DPFMDeliveryDocumentCreates"
+	}
 
 	return output, nil
 }
 
-func structuralizeHeader(ordersSDC dpfm_api_processing_data_formatter.OrdersSDC) (dpfm_api_output_formatter.OrdersHeader, error) {
-	ordersHeader, err := dpfm_api_output_formatter.TypeConverter[dpfm_api_output_formatter.OrdersHeader](ordersSDC.HeaderAndItem.Header)
+func structuralizeHeader(deliveryDocumentSDC dpfm_api_processing_data_formatter.DeliveryDocumentSDC) (dpfm_api_output_formatter.DeliveryDocumentHeader, error) {
+	deliveryDocumentHeader, err := dpfm_api_output_formatter.TypeConverter[dpfm_api_output_formatter.DeliveryDocumentHeader](deliveryDocumentSDC.HeaderAndItem.Header)
 	if err != nil {
-		return dpfm_api_output_formatter.OrdersHeader{}, err
+		return dpfm_api_output_formatter.DeliveryDocumentHeader{}, err
 	}
 
-	return ordersHeader, nil
+	return deliveryDocumentHeader, nil
 }
 
-func structuralizeItem(ordersSDC dpfm_api_processing_data_formatter.OrdersSDC) ([]dpfm_api_output_formatter.OrdersItem, error) {
-	ordersItems := make([]dpfm_api_output_formatter.OrdersItem, 0)
-	for i, item := range ordersSDC.HeaderAndItem.Item {
-		ordersItem, err := dpfm_api_output_formatter.TypeConverter[dpfm_api_output_formatter.OrdersItem](item)
+func structuralizeItem(deliveryDocumentSDC dpfm_api_processing_data_formatter.DeliveryDocumentSDC) ([]dpfm_api_output_formatter.DeliveryDocumentItem, error) {
+	deliveryDocumentItems := make([]dpfm_api_output_formatter.DeliveryDocumentItem, 0)
+	for _, item := range deliveryDocumentSDC.HeaderAndItem.Item {
+		deliveryDocumentItem, err := dpfm_api_output_formatter.TypeConverter[dpfm_api_output_formatter.DeliveryDocumentItem](item)
 		if err != nil {
-			return []dpfm_api_output_formatter.OrdersItem{}, err
+			return []dpfm_api_output_formatter.DeliveryDocumentItem{}, err
 		}
 
-		// ItemPricingElement
-		ordersItemPricingElements, err := structuralizeItemPricingElemnt(ordersSDC, i)
-		if err != nil {
-			return []dpfm_api_output_formatter.OrdersItem{}, err
-		}
-
-		// ItemScheduleLine
-		ordersItemScheduleLines, err := structuralizeItemScheduleLine(ordersSDC, i)
-		if err != nil {
-			return []dpfm_api_output_formatter.OrdersItem{}, err
-		}
-
-		ordersItem.ItemPricingElement = ordersItemPricingElements
-		ordersItem.ItemScheduleLine = ordersItemScheduleLines
-		ordersItems = append(ordersItems, ordersItem)
+		deliveryDocumentItems = append(deliveryDocumentItems, deliveryDocumentItem)
 	}
 
-	return ordersItems, nil
+	return deliveryDocumentItems, nil
 }
 
-func structuralizeItemPricingElemnt(ordersSDC dpfm_api_processing_data_formatter.OrdersSDC, i int) ([]dpfm_api_output_formatter.OrdersItemPricingElement, error) {
-	ordersItemPricingElements := make([]dpfm_api_output_formatter.OrdersItemPricingElement, 0)
-	for _, itemPricingElement := range ordersSDC.HeaderAndItemAndPricingElement[i].ItemPricingElement {
-		ordersItemPricingElement, err := dpfm_api_output_formatter.TypeConverter[dpfm_api_output_formatter.OrdersItemPricingElement](itemPricingElement)
+func structuralizePartner(deliveryDocumentSDC dpfm_api_processing_data_formatter.DeliveryDocumentSDC) ([]dpfm_api_output_formatter.DeliveryDocumentPartner, error) {
+	deliveryDocumentPartners := make([]dpfm_api_output_formatter.DeliveryDocumentPartner, 0)
+	for _, partner := range deliveryDocumentSDC.HeaderAndPartner.Partner {
+		deliveryDocumentPartner, err := dpfm_api_output_formatter.TypeConverter[dpfm_api_output_formatter.DeliveryDocumentPartner](partner)
 		if err != nil {
-			return []dpfm_api_output_formatter.OrdersItemPricingElement{}, err
+			return []dpfm_api_output_formatter.DeliveryDocumentPartner{}, err
 		}
-		ordersItemPricingElements = append(ordersItemPricingElements, ordersItemPricingElement)
+		deliveryDocumentPartners = append(deliveryDocumentPartners, deliveryDocumentPartner)
 	}
 
-	return ordersItemPricingElements, nil
+	return deliveryDocumentPartners, nil
 }
 
-func structuralizeItemScheduleLine(ordersSDC dpfm_api_processing_data_formatter.OrdersSDC, i int) ([]dpfm_api_output_formatter.OrdersItemScheduleLine, error) {
-	ordersItemScheduleLines := make([]dpfm_api_output_formatter.OrdersItemScheduleLine, 0)
-	for _, itemScheduleLine := range ordersSDC.HeaderAndItemAndScheduleLine[i].ItemScheduleLine {
-		ordersItemScheduleLine, err := dpfm_api_output_formatter.TypeConverter[dpfm_api_output_formatter.OrdersItemScheduleLine](itemScheduleLine)
+func structuralizeAddress(deliveryDocumentSDC dpfm_api_processing_data_formatter.DeliveryDocumentSDC) ([]dpfm_api_output_formatter.DeliveryDocumentAddress, error) {
+	deliveryDocumentAddresses := make([]dpfm_api_output_formatter.DeliveryDocumentAddress, 0)
+	for _, address := range deliveryDocumentSDC.HeaderAndAddress.Address {
+		deliveryDocumentAddress, err := dpfm_api_output_formatter.TypeConverter[dpfm_api_output_formatter.DeliveryDocumentAddress](address)
 		if err != nil {
-			return []dpfm_api_output_formatter.OrdersItemScheduleLine{}, err
+			return []dpfm_api_output_formatter.DeliveryDocumentAddress{}, err
 		}
-		ordersItemScheduleLines = append(ordersItemScheduleLines, ordersItemScheduleLine)
+		deliveryDocumentAddresses = append(deliveryDocumentAddresses, deliveryDocumentAddress)
 	}
 
-	return ordersItemScheduleLines, nil
-}
-
-func structuralizePartner(ordersSDC dpfm_api_processing_data_formatter.OrdersSDC) ([]dpfm_api_output_formatter.OrdersPartner, error) {
-	ordersPartners := make([]dpfm_api_output_formatter.OrdersPartner, 0)
-	for _, partner := range ordersSDC.HeaderAndPartner.Partner {
-		ordersPartner, err := dpfm_api_output_formatter.TypeConverter[dpfm_api_output_formatter.OrdersPartner](partner)
-		if err != nil {
-			return []dpfm_api_output_formatter.OrdersPartner{}, err
-		}
-		ordersPartners = append(ordersPartners, ordersPartner)
-	}
-
-	return ordersPartners, nil
-}
-
-func structuralizeAddress(ordersSDC dpfm_api_processing_data_formatter.OrdersSDC) ([]dpfm_api_output_formatter.OrdersAddress, error) {
-	ordersAddresses := make([]dpfm_api_output_formatter.OrdersAddress, 0)
-	for _, address := range ordersSDC.HeaderAndAddress.Address {
-		ordersAddress, err := dpfm_api_output_formatter.TypeConverter[dpfm_api_output_formatter.OrdersAddress](address)
-		if err != nil {
-			return []dpfm_api_output_formatter.OrdersAddress{}, err
-		}
-		ordersAddresses = append(ordersAddresses, ordersAddress)
-	}
-
-	return ordersAddresses, nil
+	return deliveryDocumentAddresses, nil
 }

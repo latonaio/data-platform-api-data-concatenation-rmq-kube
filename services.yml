@@ -9,12 +9,12 @@ spec:
   selector:
     matchLabels:
       run: data-platform-api-data-concatenation-rmq-kube
-      app: ORDERS
+      app: DATA_PLATFORM_API_DATA_CONCATENATION
   template:
     metadata:
       labels:
         run: data-platform-api-data-concatenation-rmq-kube
-        app: ORDERS
+        app: DATA_PLATFORM_API_DATA_CONCATENATION
     spec:
       hostname: data-platform-api-data-concatenation-rmq-kube
       containers:
@@ -25,7 +25,7 @@ spec:
             - name : "RMQ_QUEUE_FROM"
               value: "data-platform-api-data-concatenation-queue"
             - name : "RMQ_QUEUE_TO"
-              value: "data-platform-api-orders-creates-queue,convert-to-dpfm-orders-from-orders-edi-for-smes-queue"
+              value: "data-platform-api-data-concatenation-queue"
             - name : "NESTJS_DATA_CONNECTION_REQUEST_CONTROL_MANAGER_CONSUME"
               value: "nestjs-data-connection-request-control-manager-consume"
             - name: "MYSQL_DB_NAME"

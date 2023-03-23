@@ -2,8 +2,12 @@ package main
 
 import (
 	dpfm_api_input_reader "data-platform-api-data-concatenation-rmq-kube/DPFM_API_Input_Reader"
+	"data-platform-api-data-concatenation-rmq-kube/concatenate_functions/delivery_document_concatenate_function"
+	"data-platform-api-data-concatenation-rmq-kube/concatenate_functions/delivery_notice_edi_for_smes_concatenate_function"
+	"data-platform-api-data-concatenation-rmq-kube/concatenate_functions/delivery_notice_edi_for_voluntary_chain_smes_concatenate_function"
 	"data-platform-api-data-concatenation-rmq-kube/concatenate_functions/orders_concatenate_function"
 	"data-platform-api-data-concatenation-rmq-kube/concatenate_functions/orders_edi_for_smes_concatenate_function"
+	"data-platform-api-data-concatenation-rmq-kube/concatenate_functions/orders_edi_for_voluntary_chain_smes_concatenate_function"
 	"data-platform-api-data-concatenation-rmq-kube/config"
 	"encoding/json"
 	"fmt"
@@ -72,15 +76,31 @@ func callProcess(conf *config.Conf, rmq *rabbitmq.RabbitmqClient, msg rabbitmq.R
 	if err != nil {
 		return err
 	}
+	queueName := getQueneName(concatenateMapper)
+	if len(queueName) == 0 {
+		return xerrors.New("APIQueueName is brank")
+	}
 
 	var output interface{}
 	switch serviceLabel {
 	case "FUNCTION_ORDERS_DATA_CONCATENATION":
 		c := orders_concatenate_function.NewOrdersContraller(conf, rmq, msg, l)
-		output, err = c.OrdersProcess(concatenateMapper)
+		output, err = c.OrdersProcess(concatenateMapper, queueName)
 	case "FUNCTION_ORDERS_EDI_FOR_SMES_DATA_CONCATENATION":
 		c := orders_edi_for_smes_concatenate_function.NewOrdersEDIForSMEsContraller(conf, rmq, msg, l)
-		output, err = c.OrdersEDIForSMEsProcess(concatenateMapper)
+		output, err = c.OrdersEDIForSMEsProcess(concatenateMapper, queueName)
+	case "FUNCTION_ORDERS_EDI_FOR_VOLUNTARY_CHAIN_SMES_DATA_CONCATENATION":
+		c := orders_edi_for_voluntary_chain_smes_concatenate_function.NewOrdersEDIForVoluntaryChainSMEsContraller(conf, rmq, msg, l)
+		output, err = c.OrdersEDIForVoluntaryChainSMEsProcess(concatenateMapper, queueName)
+	case "FUNCTION_DELIVERY_DOCUMENT_DATA_CONCATENATION":
+		c := delivery_document_concatenate_function.NewDeliveryDocumentContraller(conf, rmq, msg, l)
+		output, err = c.DeliveryDocumentProcess(concatenateMapper, queueName)
+	case "FUNCTION_DELIVERY_NOTICE_EDI_FOR_SMES_DATA_CONCATENATION":
+		c := delivery_notice_edi_for_smes_concatenate_function.NewDeliveryNoticeEDIForSMEsContraller(conf, rmq, msg, l)
+		output, err = c.DeliveryNoticeEDIForSMEsProcess(concatenateMapper, queueName)
+	case "FUNCTION_DELIVERY_NOTICE_EDI_FOR_VOLUNTARY_CHAIN_SMES_DATA_CONCATENATION":
+		c := delivery_notice_edi_for_voluntary_chain_smes_concatenate_function.NewDeliveryNoticeEDIForVoluntaryChainSMEsContraller(conf, rmq, msg, l)
+		output, err = c.DeliveryNoticeEDIForVoluntaryChainSMEsProcess(concatenateMapper, queueName)
 	default:
 		l.Info("Unknown service_label %v", input["service_label"])
 	}
@@ -117,6 +137,7 @@ func getConcatenateMapper(serviceLabel string, db *database.Mysql) ([]dpfm_api_i
 		err := rows.Scan(
 			&data.ConcatenateMapperID,
 			&data.ServiceLabel,
+			&data.APIQueueName,
 			&data.BaseAPIName,
 			&data.ConcatenateAPIName1,
 			&data.ConcatenateAPIName2,
@@ -140,6 +161,18 @@ func getConcatenateMapper(serviceLabel string, db *database.Mysql) ([]dpfm_api_i
 	}
 
 	return res, nil
+}
+
+func getQueneName(concatenateMapper []dpfm_api_input_reader.ConcatenateMapper) string {
+	var queueName string
+	for _, v := range concatenateMapper {
+		if len(v.APIQueueName) != 0 {
+			queueName = v.APIQueueName
+			break
+		}
+	}
+
+	return queueName
 }
 
 func getSessionID(data map[string]interface{}) string {

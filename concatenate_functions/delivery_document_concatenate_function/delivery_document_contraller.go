@@ -10,20 +10,20 @@ import (
 	"golang.org/x/xerrors"
 )
 
-type OrdersContraller struct {
+type DeliveryDocumentContraller struct {
 	conf *config.Conf
 	rmq  *rabbitmq.RabbitmqClient
 	msg  rabbitmq.RabbitmqMessage
 	log  *logger.Logger
 }
 
-func NewOrdersContraller(
+func NewDeliveryDocumentContraller(
 	conf *config.Conf,
 	rmq *rabbitmq.RabbitmqClient,
 	msg rabbitmq.RabbitmqMessage,
 	log *logger.Logger,
-) *OrdersContraller {
-	return &OrdersContraller{
+) *DeliveryDocumentContraller {
+	return &DeliveryDocumentContraller{
 		conf: conf,
 		rmq:  rmq,
 		msg:  msg,
@@ -31,18 +31,18 @@ func NewOrdersContraller(
 	}
 }
 
-func (c *OrdersContraller) OrdersProcess(concatenateMapper []dpfm_api_input_reader.ConcatenateMapper) (dpfm_api_output_formatter.OrdersSDC, error) {
-	ordersConcatenated, err := c.OrdersConcatenation(concatenateMapper)
+func (c *DeliveryDocumentContraller) DeliveryDocumentProcess(concatenateMapper []dpfm_api_input_reader.ConcatenateMapper, queueName string) (dpfm_api_output_formatter.DeliveryDocumentSDC, error) {
+	deliveryDocumentConcatenated, err := c.DeliveryDocumentConcatenation(concatenateMapper)
 	if err != nil {
-		return dpfm_api_output_formatter.OrdersSDC{}, xerrors.Errorf("Concatenate Error: %w", err)
+		return dpfm_api_output_formatter.DeliveryDocumentSDC{}, xerrors.Errorf("Concatenate Error: %w", err)
 	}
 
-	ordersOutput, err := c.OrdersStructuralization(ordersConcatenated)
+	deliveryDocumentOutput, err := c.DeliveryDocumentStructuralization(deliveryDocumentConcatenated)
 	if err != nil {
-		return dpfm_api_output_formatter.OrdersSDC{}, xerrors.Errorf("Structuralize Error: %w", err)
+		return dpfm_api_output_formatter.DeliveryDocumentSDC{}, xerrors.Errorf("Structuralize Error: %w", err)
 	}
 
-	c.rmq.Send(c.conf.RMQ.QueueTo()[0], ordersOutput)
+	c.rmq.Send(queueName, deliveryDocumentOutput)
 
-	return ordersOutput, nil
+	return deliveryDocumentOutput, nil
 }

@@ -1,19 +1,19 @@
 package dpfm_api_input_reader
 
 type DeliveryDocumentSDC struct {
-	ConnectionKey    string          `json:"connection_key"`
-	Result           bool            `json:"result"`
-	RedisKey         string          `json:"redis_key"`
-	Filepath         string          `json:"filepath"`
-	APIStatusCode    int             `json:"api_status_code"`
-	RuntimeSessionID string          `json:"runtime_session_id"`
-	BusinessPartner  *int            `json:"business_partner"`
-	ServiceLabel     string          `json:"service_label"`
-	APIType          string          `json:"api_type"`
-	InputParameters  InputParameters `json:"InputParameters"`
-	APISchema        string          `json:"api_schema"`
-	Accepter         []string        `json:"accepter"`
-	Deleted          bool            `json:"deleted"`
+	ConnectionKey     string                            `json:"connection_key"`
+	Result            bool                              `json:"result"`
+	RedisKey          string                            `json:"redis_key"`
+	Filepath          string                            `json:"filepath"`
+	APIStatusCode     int                               `json:"api_status_code"`
+	RuntimeSessionID  string                            `json:"runtime_session_id"`
+	BusinessPartner   *int                              `json:"business_partner"`
+	ServiceLabel      string                            `json:"service_label"`
+	APIType           string                            `json:"api_type"`
+	DataConcatenation DeliveryDocumentDataConcatenation `json:"DataConcatenation"`
+	APISchema         string                            `json:"api_schema"`
+	Accepter          []string                          `json:"accepter"`
+	Deleted           bool                              `json:"deleted"`
 }
 
 type DeliveryDocumentDataConcatenation struct {
@@ -21,24 +21,6 @@ type DeliveryDocumentDataConcatenation struct {
 	Item    []DeliveryDocumentItem    `json:"DeliveryDocumentItem"`
 	Address []DeliveryDocumentAddress `json:"DeliveryDocumentAddress"`
 	Partner []DeliveryDocumentPartner `json:"DeliveryDocumentPartner"`
-}
-
-type InputParameters struct {
-	DeliverToParty            *[]*int    `json:"DeliverToParty"`
-	DeliverToPartyTo          *int       `json:"DeliverToPartyTo"`
-	DeliverToPartyFrom        *int       `json:"DeliverToPartyFrom"`
-	DeliverFromParty          *[]*int    `json:"DeliverFromParty"`
-	DeliverFromPartyTo        *int       `json:"DeliverFromPartyTo"`
-	DeliverFromPartyFrom      *int       `json:"DeliverFromPartyFrom"`
-	DeliverToPlant            *[]*string `json:"DeliverToPlant"`
-	DeliverToPlantTo          *string    `json:"DeliverToPlantTo"`
-	DeliverToPlantFrom        *string    `json:"DeliverToPlantFrom"`
-	DeliverFromPlant          *[]*string `json:"DeliverFromPlant"`
-	DeliverFromPlantTo        *string    `json:"DeliverFromPlantTo"`
-	DeliverFromPlantFrom      *string    `json:"DeliverFromPlantFrom"`
-	ConfirmedDeliveryDate     *[]*string `json:"ConfirmedDeliveryDate"`
-	ConfirmedDeliveryDateTo   *string    `json:"ConfirmedDeliveryDateTo"`
-	ConfirmedDeliveryDateFrom *string    `json:"ConfirmedDeliveryDateFrom"`
 }
 
 type DeliveryDocumentHeader struct {

@@ -1,38 +1,24 @@
 package dpfm_dpfm_api_processing_data_formatter
 
 type DeliveryDocumentSDC struct {
-	HeaderAndItem                  OrdersHeaderAndItem                    `json:"HeaderAndItem"`
-	HeaderAndItemAndPricingElement []OrdersHeaderAndItemAndPricingElement `json:"HeaderAndItemAndPricingElement"`
-	HeaderAndItemAndScheduleLine   []OrdersHeaderAndItemAndScheduleLine   `json:"HeaderAndItemAndScheduleLine"`
-	HeaderAndPartner               OrdersHeaderAndPartner                 `json:"HeaderAndPartner"`
-	HeaderAndAddress               OrdersHeaderAndAddress                 `json:"HeaderAndAddress"`
+	HeaderAndItem    DeliveryDocumentHeaderAndItem    `json:"HeaderAndItem"`
+	HeaderAndPartner DeliveryDocumentHeaderAndPartner `json:"HeaderAndPartner"`
+	HeaderAndAddress DeliveryDocumentHeaderAndAddress `json:"HeaderAndAddress"`
 }
 
 type DeliveryDocumentHeaderAndItem struct {
-	Header OrdersHeader `json:"Header"`
-	Item   []OrdersItem `json:"Item"`
-}
-
-type DeliveryDocumentHeaderAndItemAndPricingElement struct {
-	Header             OrdersHeader               `json:"Header"`
-	Item               OrdersItem                 `json:"Item"`
-	ItemPricingElement []OrdersItemPricingElement `json:"ItemPricingElement"`
-}
-
-type DeliveryDocumentHeaderAndItemAndScheduleLine struct {
-	Header           OrdersHeader             `json:"Header"`
-	Item             OrdersItem               `json:"Item"`
-	ItemScheduleLine []OrdersItemScheduleLine `json:"ItemScheduleLine"`
+	Header DeliveryDocumentHeader `json:"Header"`
+	Item   []DeliveryDocumentItem `json:"Item"`
 }
 
 type DeliveryDocumentHeaderAndPartner struct {
-	Header  OrdersHeader    `json:"Header"`
-	Partner []OrdersPartner `json:"Partner"`
+	Header  DeliveryDocumentHeader    `json:"Header"`
+	Partner []DeliveryDocumentPartner `json:"Partner"`
 }
 
 type DeliveryDocumentHeaderAndAddress struct {
-	Header  OrdersHeader    `json:"Header"`
-	Address []OrdersAddress `json:"Address"`
+	Header  DeliveryDocumentHeader    `json:"Header"`
+	Address []DeliveryDocumentAddress `json:"Address"`
 }
 
 type DeliveryDocumentHeader struct {

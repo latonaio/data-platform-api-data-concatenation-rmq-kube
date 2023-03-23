@@ -7,19 +7,19 @@ import (
 	"golang.org/x/xerrors"
 )
 
-func newHeaderAndPartner(sdc dpfm_api_input_reader.OrdersSDC) (dpfm_api_processing_data_formatter.OrdersHeaderAndPartner, error) {
-	processingHeader, err := dpfm_api_processing_data_formatter.TypeConverter[dpfm_api_processing_data_formatter.OrdersHeader](sdc.DataConcatenation.Header)
+func newHeaderAndPartner(sdc dpfm_api_input_reader.DeliveryDocumentSDC) (dpfm_api_processing_data_formatter.DeliveryDocumentHeaderAndPartner, error) {
+	processingHeader, err := dpfm_api_processing_data_formatter.TypeConverter[dpfm_api_processing_data_formatter.DeliveryDocumentHeader](sdc.DataConcatenation.Header)
 	if err != nil {
-		return dpfm_api_processing_data_formatter.OrdersHeaderAndPartner{}, xerrors.Errorf("TypeConverter Error: %w", err)
+		return dpfm_api_processing_data_formatter.DeliveryDocumentHeaderAndPartner{}, xerrors.Errorf("TypeConverter Error: %w", err)
 	}
 
-	orderID := processingHeader.OrderID
-	processingPartners, err := extractPartner(orderID, sdc.DataConcatenation.Partner)
+	deliveryDocument := processingHeader.DeliveryDocument
+	processingPartners, err := extractPartner(deliveryDocument, sdc.DataConcatenation.Partner)
 	if err != nil {
-		return dpfm_api_processing_data_formatter.OrdersHeaderAndPartner{}, xerrors.Errorf("extractPartner Error: %w", err)
+		return dpfm_api_processing_data_formatter.DeliveryDocumentHeaderAndPartner{}, xerrors.Errorf("extractPartner Error: %w", err)
 	}
 
-	headerAndPartner := dpfm_api_processing_data_formatter.OrdersHeaderAndPartner{
+	headerAndPartner := dpfm_api_processing_data_formatter.DeliveryDocumentHeaderAndPartner{
 		Header:  processingHeader,
 		Partner: processingPartners,
 	}
@@ -27,16 +27,16 @@ func newHeaderAndPartner(sdc dpfm_api_input_reader.OrdersSDC) (dpfm_api_processi
 	return headerAndPartner, err
 }
 
-func extractPartner(orderID int, partners []dpfm_api_input_reader.OrdersPartner) ([]dpfm_api_processing_data_formatter.OrdersPartner, error) {
-	processingPartners := make([]dpfm_api_processing_data_formatter.OrdersPartner, 0)
+func extractPartner(deliveryDocument int, partners []dpfm_api_input_reader.DeliveryDocumentPartner) ([]dpfm_api_processing_data_formatter.DeliveryDocumentPartner, error) {
+	processingPartners := make([]dpfm_api_processing_data_formatter.DeliveryDocumentPartner, 0)
 
 	for _, partner := range partners {
-		if partner.OrderID != orderID {
+		if partner.DeliveryDocument != deliveryDocument {
 			continue
 		}
-		processingPartner, err := dpfm_api_processing_data_formatter.TypeConverter[dpfm_api_processing_data_formatter.OrdersPartner](partner)
+		processingPartner, err := dpfm_api_processing_data_formatter.TypeConverter[dpfm_api_processing_data_formatter.DeliveryDocumentPartner](partner)
 		if err != nil {
-			return []dpfm_api_processing_data_formatter.OrdersPartner{}, xerrors.Errorf("TypeConverter Error: %w", err)
+			return []dpfm_api_processing_data_formatter.DeliveryDocumentPartner{}, xerrors.Errorf("TypeConverter Error: %w", err)
 		}
 		processingPartners = append(processingPartners, processingPartner)
 	}

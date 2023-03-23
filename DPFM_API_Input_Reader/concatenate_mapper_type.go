@@ -3,6 +3,7 @@ package dpfm_api_input_reader
 type ConcatenateMapper struct {
 	ConcatenateMapperID int     `json:"ConcatenateMapperID"`
 	ServiceLabel        string  `json:"ServiceLabel"`
+	APIQueueName        string  `json:"APIQueueName"`
 	BaseAPIName         string  `json:"BaseAPIName"`
 	ConcatenateAPIName1 string  `json:"ConcatenateAPIName1"`
 	ConcatenateAPIName2 string  `json:"ConcatenateAPIName2"`

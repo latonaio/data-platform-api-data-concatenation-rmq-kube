@@ -3,6 +3,7 @@ package orders_concatenate_function
 import (
 	dpfm_api_output_formatter "data-platform-api-data-concatenation-rmq-kube/DPFM_API_Output_Formatter"
 	dpfm_api_processing_data_formatter "data-platform-api-data-concatenation-rmq-kube/DPFM_API_Processing_Data_Formatter"
+	"strings"
 )
 
 func (c *OrdersContraller) OrdersStructuralization(ordersSDC dpfm_api_processing_data_formatter.OrdersSDC) (dpfm_api_output_formatter.OrdersSDC, error) {
@@ -38,8 +39,21 @@ func (c *OrdersContraller) OrdersStructuralization(ordersSDC dpfm_api_processing
 
 	output.Header = ordersHeader
 	output.ServiceLabel = "ORDERS"
-	output.APIType = "creates"
-	output.APISchema = "DPFMOrdersCreates"
+	// output.APIType = "creates"
+
+	switch strings.ToLower(output.APIType) {
+	case "creates":
+		output.APISchema = "DPFMOrdersCreates"
+	case "updates":
+		output.APISchema = "DPFMOrdersUpdates"
+	case "function":
+		output.APIType = "creates"
+		output.APISchema = "DPFMOrdersCreates"
+	default:
+		c.log.Error("unknown apitype %s", output.APIType)
+		output.APIType = "creates"
+		output.APISchema = "DPFMOrdersCreates"
+	}
 
 	return output, nil
 }
