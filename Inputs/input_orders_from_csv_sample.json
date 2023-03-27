@@ -7,7 +7,7 @@
 	"runtime_session_id": "boi9ar543dg91ipdnspi099u231280ab0v8af0ew",
 	"business_partner": 101,
 	"service_label": "FUNCTION_ORDERS_DATA_CONCATENATION",
-	"api_type": "function",
+	"api_type": "updates",
 	"DataConcatenation": {
 		"OrdersHeader": {
 			"OrderID": 1,
@@ -26,9 +26,9 @@
 			"Payee": 201,
 			"CreationDate": null,
 			"LastChangeDate": null,
-			"ContractType": null,
+			"ContractType": "MNTH",
 			"OrderValidityStartDate": "2022-01-01",
-			"OrderValidityEndDate": "9999-12-31",
+			"OrderValidityEndDate": "2023-12-31",
 			"InvoicePeriodStartDate": "2022-04-01",
 			"InvoicePeriodEndDate": "2023-10-31",
 			"TotalNetAmount": null,
@@ -49,7 +49,7 @@
 			"ReferenceDocument": null,
 			"ReferenceDocumentItem": null,
 			"AccountAssignmentGroup": null,
-			"AccountingExchangeRate": null,
+			"AccountingExchangeRate": 0.0074,
 			"InvoiceDocumentDate": null,
 			"IsExportImport": false,
 			"HeaderText": "Test",
@@ -62,7 +62,7 @@
 		"OrdersItem": [
 			{
 				"OrderID": 1,
-				"OrderItem": 1,
+				"OrderItem": 7,
 				"OrderItemCategory": null,
 				"SupplyChainRelationshipID": null,
 				"SupplyChainRelationshipDeliveryID": null,
@@ -120,6 +120,7 @@
 				"ServicesRenderingDate": "2023-02-25",
 				"OrderQuantityInBaseUnit": 20,
 				"OrderQuantityInDeliveryUnit": 20,
+				"QuantityPerPackage": 10,
 				"StockConfirmationPolicy": null,
 				"StockConfirmationStatus": null,
 				"ConfirmedOrderQuantityInBaseUnit": null,
@@ -145,6 +146,9 @@
 				"ProductionPlantBatchValidityStartTime": "00:00:00",
 				"ProductionPlantBatchValidityEndDate": "2020-10-31",
 				"ProductionPlantBatchValidityEndTime": "23:59:59",
+				"InspectionPlan": null,
+				"InspectionPlant": null,
+				"InspectionOrder": null,
 				"Incoterms": "CIF",
 				"TransactionTaxClassification": null,
 				"ProductTaxClassificationBillToCountry": null,
@@ -158,7 +162,7 @@
 				"NetPaymentDays": null,
 				"PaymentMethod": null,
 				"Project": "1094059",
-				"AccountingExchangeRate": null,
+				"AccountingExchangeRate": 0.0074,
 				"ReferenceDocument": null,
 				"ReferenceDocumentItem": null,
 				"ItemCompleteDeliveryIsDefined": false,
@@ -180,7 +184,7 @@
 		"OrdersItemPricingElement": [
 			{
 				"OrderID": 1,
-				"OrderItem": 1,
+				"OrderItem": 7,
 				"SupplyChainRelationshipID": 0,
 				"Buyer": 0,
 				"Seller": 0,
@@ -202,7 +206,7 @@
 		"OrdersItemScheduleLine": [
 			{
 				"OrderID": 1,
-				"OrderItem": 1,
+				"OrderItem": 7,
 				"ScheduleLine": 1,
 				"SupplyChainRelationshipID": null,
 				"SupplyChainRelationshipStockConfPlantID": null,

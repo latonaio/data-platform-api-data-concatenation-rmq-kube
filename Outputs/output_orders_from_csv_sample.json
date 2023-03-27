@@ -7,7 +7,7 @@
   "runtime_session_id": "boi9ar543dg91ipdnspi099u231280ab0v8af0ew",
   "business_partner": 101,
   "service_label": "ORDERS",
-  "api_type": "creates",
+  "api_type": "updates",
   "Orders": {
     "OrderID": 1,
     "OrderDate": "2022-11-22",
@@ -25,9 +25,9 @@
     "Payee": 201,
     "CreationDate": null,
     "LastChangeDate": null,
-    "ContractType": null,
+    "ContractType": "MNTH",
     "OrderValidityStartDate": "2022-01-01",
-    "OrderValidityEndDate": "9999-12-31",
+    "OrderValidityEndDate": "2023-12-31",
     "InvoicePeriodStartDate": "2022-04-01",
     "InvoicePeriodEndDate": "2023-10-31",
     "TotalNetAmount": null,
@@ -48,7 +48,7 @@
     "ReferenceDocument": null,
     "ReferenceDocumentItem": null,
     "AccountAssignmentGroup": null,
-    "AccountingExchangeRate": null,
+    "AccountingExchangeRate": 0.0074,
     "InvoiceDocumentDate": null,
     "IsExportImport": false,
     "HeaderText": "Test",
@@ -59,7 +59,7 @@
     "IsMarkedForDeletion": false,
     "Item": [
       {
-        "OrderItem": 1,
+        "OrderItem": 7,
         "OrderItemCategory": null,
         "SupplyChainRelationshipID": null,
         "SupplyChainRelationshipDeliveryID": null,
@@ -117,6 +117,7 @@
         "ServicesRenderingDate": "2023-02-25",
         "OrderQuantityInBaseUnit": 20,
         "OrderQuantityInDeliveryUnit": 20,
+        "QuantityPerPackage": 10,
         "StockConfirmationPolicy": null,
         "StockConfirmationStatus": null,
         "ConfirmedOrderQuantityInBaseUnit": null,
@@ -142,6 +143,9 @@
         "ProductionPlantBatchValidityStartTime": "00:00:00",
         "ProductionPlantBatchValidityEndDate": "2020-10-31",
         "ProductionPlantBatchValidityEndTime": "23:59:59",
+        "InspectionPlan": null,
+        "InspectionPlant": null,
+        "InspectionOrder": null,
         "Incoterms": "CIF",
         "TransactionTaxClassification": null,
         "ProductTaxClassificationBillToCountry": null,
@@ -155,7 +159,7 @@
         "NetPaymentDays": null,
         "PaymentMethod": null,
         "Project": "1094059",
-        "AccountingExchangeRate": null,
+        "AccountingExchangeRate": 0.0074,
         "ReferenceDocument": null,
         "ReferenceDocumentItem": null,
         "ItemCompleteDeliveryIsDefined": false,
@@ -252,7 +256,7 @@
       }
     ]
   },
-  "api_schema": "DPFMOrdersCreates",
+  "api_schema": "DPFMOrdersUpdates",
   "accepter": [
     "All"
   ],
