@@ -16,6 +16,7 @@ spec:
         run: data-platform-api-data-concatenation-rmq-kube
         app: DATA_PLATFORM_API_DATA_CONCATENATION
     spec:
+      nodeName: worker
       hostname: data-platform-api-data-concatenation-rmq-kube
       containers:
         - name: data-platform-api-data-concatenation-rmq-kube
